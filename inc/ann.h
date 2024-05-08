@@ -1,5 +1,7 @@
 #pragma once
 
+#define DEFAULT_ERROR_LEVEL "1"
+
 #define VER_MAJOR 1
 #define VER_MNOR 0
 #define VER_SUBMINOR 0
