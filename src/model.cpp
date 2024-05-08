@@ -9,20 +9,20 @@
 #include "ann.h"
 #include "model.h"
 
-#define ANN_MODEL_INIT(model) \
-  std::string model##_errlev = DEFAULT_ERROR_LEVEL; \
-  if (accuracy_info.find("ALL") != accuracy_info.end()) \
-    model##_errlev = accuracy_info.find("ALL")->second; \
-  if (accuracy_info.find(#model) != accuracy_info.end()) \
-    model##_errlev = accuracy_info.find(#model)->second; \
-  model = std::make_shared<Model>(); \
-  const bool model##_init = \
-    model->Init(header + #model "_" + model##_errlev + "p.dat"); \
-  string_buffer += (#model " " + model##_errlev + "% accuracy"); \
-  if (model##_init) \
-    string_buffer += " (INIT_SUCCESS) -> " + \
-                     std::to_string(model->getAccuarcy()) + "% accuracy\n"; \
-  else \
+#define ANN_MODEL_INIT(model)                                               \
+  std::string model##_errlev = DEFAULT_ERROR_LEVEL;                         \
+  if (accuracy_info.find("ALL") != accuracy_info.end())                     \
+    model##_errlev = accuracy_info.find("ALL")->second;                     \
+  if (accuracy_info.find(#model) != accuracy_info.end())                    \
+    model##_errlev = accuracy_info.find(#model)->second;                    \
+  model = std::make_shared<Model>();                                        \
+  const bool model##_init =                                                 \
+    model->Init(header + #model "_" + model##_errlev + "p.dat");            \
+  string_buffer += (#model " " + model##_errlev + "% accuracy");            \
+  if (model##_init)                                                         \
+    string_buffer += " (INIT_SUCCESS) -> " +                                \
+                     std::to_string(model->getAccuracy()) + "% accuracy\n"; \
+  else                                                                      \
     string_buffer += " (INIT FAILURE)\n"
 
 namespace ANN_internal { 
@@ -59,7 +59,9 @@ const char* ANN_Init(const char* modeldir, const char* errlev) {
   }
 
   const std::string header = std::string(modeldir);
-  string_buffer = "ANN ver." + std::to_string(VER_MAJOR) + "." + std::to_string(VER_MINOR) + "." + std::to_string(VER_SUBMINOR) + "\n";
+  string_buffer = "ANN ver." + std::to_string(VER_MAJOR) + "." 
+                             + std::to_string(VER_MINOR) + "." 
+                             + std::to_string(VER_SUBMINOR) + "\n";
 
   ANN_MODEL_INIT(ET);
   ANN_MODEL_INIT(ER);
@@ -96,28 +98,29 @@ namespace ANN {
   std::string string_buffer;
 }
 
-#define ANN_MODEL_DEF(x1, x2, y) \
-  namespace ANN { \
-    std::shared_ptr<Model> x1##x2##y \
-  } \
-  double ANN_##x1##x2##y(const double x1, const double x2) { \
-    using namespace ANN; \
-    const double x[2] = {std::log(x1), std::log(x2)}; \
-    double ln##y; \
-    x1##x2##y->Pred(x, &ln##y); \
-    return std::exp(ln##y); \
-  } \
-  void ANN_##x1##x2##y##_batch(const int n, const double* x1, const double* x2, double* y) { \
-    using namespace ANN; \
-    std::vector<double> x(n * 2); \
-    for (int i = 0; i < n; i++) { \
-      x[i * 2] = std::log(x1[i]); \
-      x[i * 2 + 1] = std::log(x2[i]); \
-    } \
-    double* ln##y = y; \
-    x1##x2##y->Pred(n, &x[0], ln##y); \
-    for (int i = 0; i < n; i++) \
-      y[i] = std::exp(ln##y[i]); \
+#define ANN_MODEL_DEF(x1, x2, y)                                                  \
+  namespace ANN {                                                                 \
+    std::shared_ptr<Model> x1##x2##y;                                             \
+  }                                                                               \
+  double ANN_##x1##x2##y(const double x1, const double x2) {                      \
+    using namespace ANN;                                                          \
+    const double x[2] = {std::log(x1), std::log(x2)};                             \
+    double ln##y;                                                                 \
+    x1##x2##y->Pred(x, &ln##y);                                                   \
+    return std::exp(ln##y);                                                       \
+  }                                                                               \
+  double ANN_##x1##x2##y##_Grad(double* grad, const double x1, const double x2) { \
+    using namespace ANN;                                                          \
+    const double x[2] = {std::log(x1), std::log(x2)};                             \
+    double ln##y;                                                                 \
+    x1##x2##y->Derivative(x, &ln##y, grad);                                       \
+    const double y = std::exp(ln##y);                                             \
+    grad[0] *= (y / x1);                                                          \
+    grad[1] *= (y / x2);                                                          \
+    return y;                                                                     \
   }
 
 ANN_MODEL_DEF(ET, Ttr, Tve);
+ANN_MODEL_DEF(ER, Ttr, Tve);
+ANN_MODEL_DEF(EV, Ttr, Tve);
+ANN_MODEL_DEF(EE, Ttr, Tve);

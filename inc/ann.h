@@ -3,7 +3,7 @@
 #define DEFAULT_ERROR_LEVEL "1"
 
 #define VER_MAJOR 1
-#define VER_MNOR 0
+#define VER_MINOR 0
 #define VER_SUBMINOR 0
 
 #ifdef _WINDLL
@@ -24,11 +24,6 @@ extern "C" {
   ANN_API(double) ANN_ER(const char* species, const double Ttr, const double Tve);
   ANN_API(double) ANN_EV(const char* species, const double Ttr, const double Tve);
   ANN_API(double) ANN_EE(const char* species, const double Ttr, const double Tve);
-
-  ANN_API(double) ANN_Cvtt(const char* species, const double Ttr, const double Tve);
-  ANN_API(double) ANN_Cvtv(const char* species, const double Ttr, const double Tve);
-  ANN_API(double) ANN_Cvvt(const char* species, const double Ttr, const double Tve);
-  ANN_API(double) ANN_Cvvv(const char* species, const double Ttr, const double Tve);
 
 #ifdef __cplusplus
 }

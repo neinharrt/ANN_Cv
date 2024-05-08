@@ -49,7 +49,7 @@ namespace ANN {
       const double x1 = x[2 * j];
       const double x2 = x[2 * j + 1];
       for (int i = 0; i < m; i++) {
-        const double yi = Ai_[i * 2] * x1 = Ai_[i * 2 + 1] * x2 + bi_[i];
+        const double yi = Ai_[i * 2] * x1 + Ai_[i * 2 + 1] * x2 + bi_[i];
         f[j] += (Ao_[i] * Transfer(yi));
       }
     }
@@ -74,7 +74,7 @@ namespace ANN {
       dfdx[1] += (temp * Ai_[i * 2 + 1]);
     }
   }
-  void Model::Derivative2(const double* x, double* f, double* dfdx, double* dfdx2) {
+  void Model::Derivative2(const double* x, double* f, double* dfdx, double* dfdx2) const {
     *f = bo_[0];
     dfdx[0] = dfdx[1] = 0.0;
     dfdx2[0] = dfdx2[1] = dfdx2[2] = 0.0;

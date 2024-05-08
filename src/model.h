@@ -9,9 +9,9 @@ namespace ANN {
     private:
       const int& m; // reserved for num_hidden_
 
-      int num_hidden_;
-      int num_parameter_;
-      std::vector<double> weights_;
+      int num_hidden_;              // m
+      int num_parameter_;           // 4*m+1
+      std::vector<double> weights_; // (VECTOR) 4*m+1
 
       bool x1_log_;
       bool x2_log_;
@@ -31,7 +31,7 @@ namespace ANN {
       Model();
       ~Model();
 
-      inline double GetAccuracy(void) const { return accuracy_; };
+      inline double getAccuracy(void) const { return accuracy_; };
 
       bool Init(const std::string& filename);
       void Pred(const double* x, double* f) const;
@@ -42,8 +42,8 @@ namespace ANN {
 
     private:
       inline double Transfer(const double input) const;
-      inline double DiffTrasfer(const double input) const;
-      inline double Diff2Trasfer(const double input) const;
+      inline double DiffTransfer(const double input) const;
+      inline double Diff2Transfer(const double input) const;
   };
 
   extern std::string string_buffer;
@@ -52,5 +52,4 @@ namespace ANN {
   extern std::shared_ptr<Model> ER;
   extern std::shared_ptr<Model> EV;
   extern std::shared_ptr<Model> EE;
-
 }
