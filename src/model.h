@@ -3,6 +3,8 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <cstring>
+#include <iostream>
 
 namespace ANN {
   class Model {
@@ -11,17 +13,18 @@ namespace ANN {
 
       int num_hidden_;              // m
       int num_parameter_;           // 4*m+1
-      std::vector<double> weights_; // (VECTOR) 4*m+1
+      std::vector<double> weights_; // (VECTOR) size: 4*m+1 --> | bo_ | Ao_ | bi_ | Ai_ |
 
       bool x1_log_;
       bool x2_log_;
       bool y_log_;
-      double accuracy_;
 
-      double* Ao_; // (VECTOR) 1 * m
-      double* bo_; // (SCALAR) 1 * 1
-      double* Ai_; // (MATRIX) m * 2
-      double* bi_; // (VECTOR) m * 1
+      char* species_;
+
+      double* Ao_; // (VECTOR) size: 1 * m
+      double* bo_; // (SCALAR) size: 1 * 1
+      double* Ai_; // (MATRIX) size: m * 2
+      double* bi_; // (VECTOR) size: m * 1
 
       // f = Ao*xo + bo
       // xo = Trasfer(yi)
@@ -29,9 +32,7 @@ namespace ANN {
 
     public:
       Model();
-      ~Model();
-
-      inline double getAccuracy(void) const { return accuracy_; };
+      ~Model(){};
 
       bool Init(const std::string& filename);
       void Pred(const double* x, double* f) const;
@@ -46,10 +47,19 @@ namespace ANN {
       inline double Diff2Transfer(const double input) const;
   };
 
+  const double R = 8.31446261815324; // Universal gas constant J/K-mol
+
+  const double erg2J = 1.0E-04; // Convert erg/g to J/kg
+
   extern std::string string_buffer;
 
-  extern std::shared_ptr<Model> ET;
-  extern std::shared_ptr<Model> ER;
-  extern std::shared_ptr<Model> EV;
-  extern std::shared_ptr<Model> EE;
+  extern std::vector<std::shared_ptr<Model>> models;
+
+  extern std::vector<std::string> mode_pack; // Energy modes (T, R, V, E)
+
+  extern std::vector<std::string> species_pack; // Species names (37 species)
+
+  extern std::vector<double> weight_pack; // Molecular weights of 37 species in kg/mol
+
+  extern std::vector<std::vector<double>> thetv; // Characteristic vibrational temperature
 }

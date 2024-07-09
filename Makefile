@@ -17,7 +17,7 @@ mkobj :
 
 test : all
 	$(CC) -c main_example.cpp -o $(OBJ_DIR)/main_example.o -I./inc
-	$(CC) -o test $(OBJ_DIR)/main_example.o -L./lib -lann
+	$(CC) -o test $(OBJ_DIR)/main_example.o -L./lib -lann -lstdc++
 
 $(TARGET) : $(OBJ)
 	ar rscv lib/$(TARGET).a $(OBJ)

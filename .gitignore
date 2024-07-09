@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+test
+
+# temporary files
+*.plt

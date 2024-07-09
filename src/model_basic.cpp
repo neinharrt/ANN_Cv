@@ -9,10 +9,9 @@ namespace ANN {
       num_hidden_(0),
       num_parameter_(0),
       weights_(),
-      x1_log_(true),
-      x2_log_(true),
+      x1_log_(false),
+      x2_log_(false),
       y_log_(true),
-      accuracy_(0.0),
       Ao_(nullptr),
       bo_(nullptr),
       Ai_(nullptr),
@@ -24,7 +23,6 @@ namespace ANN {
 
     fin >> num_hidden_ >> num_parameter_;
     fin >> x1_log_ >> x2_log_ >> y_log_;
-    fin >> accuracy_;
 
     weights_.resize(num_parameter_);
     Ao_ = &weights_[0];
@@ -93,11 +91,11 @@ namespace ANN {
     }
   }
   inline double Model::Transfer(const double input) const {
-    return 1.0 / (1.0 + std::exp(input));
+    return 2.0 / (1.0 + std::exp(-2.0 * input)) - 1.0;
   }
   inline double Model::DiffTransfer(const double input) const {
     const double s = Transfer(input);
-    return s * (s - 1.0);
+    return 1.0 - s * s;
   }
   inline double Model::Diff2Transfer(const double input) const {
     const double s = Transfer(input);
