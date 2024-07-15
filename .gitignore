@@ -34,3 +34,6 @@ test
 
 # temporary files
 *.plt
+
+# Database folder
+database/

@@ -24,6 +24,9 @@ extern "C" {
   ANN_API(ANN_DEF) ANN_MODEL(const char* species, const char* mode);
   ANN_API(ANN_GRAD_DEF) ANN_MODEL_GRAD(const char* species, const char* mode);
 
+  ANN_API(double) ComputeEnergy(const ANN_DEF fptr, const double x1, const double x2);
+  ANN_API(double) ComputeCv(const ANN_GRAD_DEF fptr, double* grad, const double x1, const double x2);
+
 #ifdef __cplusplus
 }
 #endif

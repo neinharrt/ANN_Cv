@@ -348,6 +348,14 @@ ANN_GRAD_DEF ANN_MODEL_GRAD(const char* species, const char* mode) {
   return nullptr;
 }
 
+double ComputeEnergy(const ANN_DEF fptr, const double x1, const double x2) {
+  return fptr(x1, x2);
+}
+
+double ComputeCv(const ANN_GRAD_DEF fptr, double* grad, const double x1, const double x2) {
+  return fptr(&grad[0], x1, x2);
+}
+
 const char* ANN_Init(const char* modeldir) {
   using namespace ANN;
 
