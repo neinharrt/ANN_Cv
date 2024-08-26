@@ -62,4 +62,6 @@ namespace ANN {
   extern std::vector<double> weight_pack; // Molecular weights of 37 species in kg/mol
 
   extern std::vector<std::vector<double>> thetv; // Characteristic vibrational temperature
+
+  extern std::vector<double> ev0; // Ground vibrational energy
 }

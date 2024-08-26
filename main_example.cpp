@@ -33,8 +33,8 @@ int main(void) {
 
   // Usage example of ANN subroutines
 
-  const double Ttr = 10000.0;
-  const double Tve = 10000.0;
+  const double Ttr = 200.0;
+  const double Tve = 200.0;
 
   double ET = 0.0; // Translational energy of N2 [J/kg]
   double ER = 0.0; // Rotational energy of N2 [J/kg]
@@ -53,96 +53,85 @@ int main(void) {
   std::string data_direc = "./database";
   for (int ispecies = 0; ispecies < nspecies; ispecies++)
   {
-    std::string species_direc = data_direc + "/" + std::string(species_pack[ispecies]) + "/";
-    std::ofstream tra_file(species_direc + "est_" + std::string(species_pack[ispecies]) + ".plt");
-    std::ofstream rot_file(species_direc + "esr_" + std::string(species_pack[ispecies]) + ".plt");
-    std::ofstream vib_file(species_direc + "esv_" + std::string(species_pack[ispecies]) + ".plt");
-    std::ofstream ele_file(species_direc + "ese_" + std::string(species_pack[ispecies]) + ".plt");
-    tra_file << std::setprecision(8) << std::scientific << std::uppercase;
-    rot_file << std::setprecision(8) << std::scientific << std::uppercase;
-    vib_file << std::setprecision(8) << std::scientific << std::uppercase;
-    ele_file << std::setprecision(8) << std::scientific << std::uppercase;
+    //std::string species_direc = data_direc + "/" + std::string(species_pack[ispecies]) + "/";
+    //std::ofstream tra_file(species_direc + "est_" + std::string(species_pack[ispecies]) + ".plt");
+    //std::ofstream rot_file(species_direc + "esr_" + std::string(species_pack[ispecies]) + ".plt");
+    //std::ofstream vib_file(species_direc + "esv_" + std::string(species_pack[ispecies]) + ".plt");
+    //std::ofstream ele_file(species_direc + "ese_" + std::string(species_pack[ispecies]) + ".plt");
+    //tra_file << std::setprecision(8) << std::scientific << std::uppercase;
+    //rot_file << std::setprecision(8) << std::scientific << std::uppercase;
+    //vib_file << std::setprecision(8) << std::scientific << std::uppercase;
+    //ele_file << std::setprecision(8) << std::scientific << std::uppercase;
 
-    tra_file << "variables = \"Ttr\", \"Tve\", \"est\"\n";
-    tra_file << "zone I=1000,J=1000\n";
+    //tra_file << "variables = \"Ttr\", \"Tve\", \"est\"\n";
+    //tra_file << "zone I=1000,J=1000\n";
 
-    rot_file << "variables = \"Ttr\", \"Tve\", \"esr\"\n";
-    rot_file << "zone I=1000,J=1000\n";
+    //rot_file << "variables = \"Ttr\", \"Tve\", \"esr\"\n";
+    //rot_file << "zone I=1000,J=1000\n";
 
-    vib_file << "variables = \"Ttr\", \"Tve\", \"esv\"\n";
-    vib_file << "zone I=1000,J=1000\n";
+    //vib_file << "variables = \"Ttr\", \"Tve\", \"esv\"\n";
+    //vib_file << "zone I=1000,J=1000\n";
 
-    ele_file << "variables = \"Ttr\", \"Tve\", \"ese\"\n";
-    ele_file << "zone I=1000,J=1000\n";
+    //ele_file << "variables = \"Ttr\", \"Tve\", \"ese\"\n";
+    //ele_file << "zone I=1000,J=1000\n";
 
-    for (int itemp1 = 0; itemp1 < 1000; itemp1++)
-    {
-      const double temp1 = 50.0 + double(itemp1)*50.0;
-      for (int itemp2 = 0; itemp2 < 1000; itemp2++)
-      {
-        const double temp2 = 50.0 + double(itemp2)*50.0;
-        ET = ComputeEnergy(fptrs[ispecies*4+0], temp1, temp2);
-        ER = ComputeEnergy(fptrs[ispecies*4+1], temp1, temp2);
-        EV = ComputeEnergy(fptrs[ispecies*4+2], temp1, temp2);
-        EE = ComputeEnergy(fptrs[ispecies*4+3], temp1, temp2);
-        tra_file << temp1 << "\t" << temp2 << "\t" << ET << "\n";
-        rot_file << temp1 << "\t" << temp2 << "\t" << ER << "\n";
-        vib_file << temp1 << "\t" << temp2 << "\t" << EV << "\n";
-        ele_file << temp1 << "\t" << temp2 << "\t" << EE << "\n";
-      }
-    }
-    tra_file.close();
-    rot_file.close();
-    vib_file.close();
-    ele_file.close();
-    //std::cout << "Translational-rotational temperature (Ttr) = " << Ttr << " K" << std::endl;
-    //std::cout << "Vibrational-electronic temperature (Tve)   = " << Tve << " K" << std::endl;
+    //for (int itemp1 = 0; itemp1 < 1000; itemp1++)
+    //{
+    //  const double temp1 = 50.0 + double(itemp1)*50.0;
+    //  for (int itemp2 = 0; itemp2 < 1000; itemp2++)
+    //  {
+    //    const double temp2 = 50.0 + double(itemp2)*50.0;
+    //    ET = ComputeEnergy(fptrs[ispecies*4+0], temp1, temp2);
+    //    ER = ComputeEnergy(fptrs[ispecies*4+1], temp1, temp2);
+    //    EV = ComputeEnergy(fptrs[ispecies*4+2], temp1, temp2);
+    //    EE = ComputeEnergy(fptrs[ispecies*4+3], temp1, temp2);
+    //    tra_file << temp1 << "\t" << temp2 << "\t" << ET << "\n";
+    //    rot_file << temp1 << "\t" << temp2 << "\t" << ER << "\n";
+    //    vib_file << temp1 << "\t" << temp2 << "\t" << EV << "\n";
+    //    ele_file << temp1 << "\t" << temp2 << "\t" << EE << "\n";
+    //  }
+    //}
+    //tra_file.close();
+    //rot_file.close();
+    //vib_file.close();
+    //ele_file.close();
+    std::cout << "Translational-rotational temperature (Ttr) = " << Ttr << " K" << std::endl;
+    std::cout << "Vibrational-electronic temperature (Tve)   = " << Tve << " K" << std::endl;
 
-    //// input: species, mode, Ttr, Tve
-    //// output: energy
-    //ET = ComputeEnergy(fptrs[ispecies*4+0], Ttr, Tve);
-    //ER = ComputeEnergy(fptrs[ispecies*4+1], Ttr, Tve);
-    //EV = ComputeEnergy(fptrs[ispecies*4+2], Ttr, Tve);
-    //EE = ComputeEnergy(fptrs[ispecies*4+3], Ttr, Tve);
-    //std::cout << std::endl << "Example 1, ANN_MODEL" << std::endl;
-    //std::cout << "Translational energy (ET) = " << ET << " J/kg" << std::endl;
-    //std::cout << "Rotational energy (ER)    = " << ER << " J/kg" << std::endl;
-    //std::cout << "Vibrational energy (EV)   = " << EV << " J/kg" << std::endl;
-    //std::cout << "Electronic energy (EE)    = " << EE << " J/kg" << std::endl;
+    // input: species, mode, Ttr, Tve
+    // output: energy
+    ET = ComputeEnergy(fptrs[ispecies*4+0], Ttr, Tve);
+    ER = ComputeEnergy(fptrs[ispecies*4+1], Ttr, Tve);
+    EV = ComputeEnergy(fptrs[ispecies*4+2], Ttr, Tve);
+    EE = ComputeEnergy(fptrs[ispecies*4+3], Ttr, Tve);
+    std::cout << std::endl << "Example 1, ANN_MODEL" << std::endl;
+    std::cout << "Translational energy (ET) = " << ET << " J/kg" << std::endl;
+    std::cout << "Rotational energy (ER)    = " << ER << " J/kg" << std::endl;
+    std::cout << "Vibrational energy (EV)   = " << EV << " J/kg" << std::endl;
+    std::cout << "Electronic energy (EE)    = " << EE << " J/kg" << std::endl;
 
-    //// input: species, mode, Ttr, Tve
-    //// output: specific heat
-    //ET = ComputeCv(gptrs[ispecies*4+0], &CvT[0], Ttr, Tve);
-    //ER = ComputeCv(gptrs[ispecies*4+1], &CvR[0], Ttr, Tve);
-    //EV = ComputeCv(gptrs[ispecies*4+2], &CvV[0], Ttr, Tve);
-    //EE = ComputeCv(gptrs[ispecies*4+3], &CvE[0], Ttr, Tve);
-    //std::cout << std::endl << "Example 2, ANN_MODEL_Grad" << std::endl;
-    //std::cout << "Translational energy (ET) = " << ET << " J/kg" << std::endl;
-    //std::cout << "dET/dTtr                  = " << CvT[0] << " J/kg-K" << std::endl;
-    //std::cout << "dET/dTve                  = " << CvT[1] << " J/kg-K" << std::endl;
-    //std::cout << "Rotational energy (ER)    = " << ER << " J/kg" << std::endl;
-    //std::cout << "dER/dTtr                  = " << CvR[0] << " J/kg-K" << std::endl;
-    //std::cout << "dER/dTve                  = " << CvR[1] << " J/kg-K" << std::endl;
-    //std::cout << "Vibrational energy (EV)   = " << EV << " J/kg" << std::endl;
-    //std::cout << "dEV/dTtr                  = " << CvV[0] << " J/kg-K" << std::endl;
-    //std::cout << "dEV/dTve                  = " << CvV[1] << " J/kg-K" << std::endl;
-    //std::cout << "Electronic energy (EE)    = " << EE << " J/kg" << std::endl;
-    //std::cout << "dEE/dTtr                  = " << CvE[0] << " J/kg-K" << std::endl;
-    //std::cout << "dEE/dTve                  = " << CvE[1] << " J/kg-K" << std::endl;
+    // input: species, mode, Ttr, Tve
+    // output: specific heat
+    ET = ComputeCv(gptrs[ispecies*4+0], &CvT[0], Ttr, Tve);
+    ER = ComputeCv(gptrs[ispecies*4+1], &CvR[0], Ttr, Tve);
+    EV = ComputeCv(gptrs[ispecies*4+2], &CvV[0], Ttr, Tve);
+    EE = ComputeCv(gptrs[ispecies*4+3], &CvE[0], Ttr, Tve);
+    std::cout << std::endl << "Example 2, ANN_MODEL_Grad" << std::endl;
+    std::cout << "Translational energy (ET) = " << ET << " J/kg" << std::endl;
+    std::cout << "dET/dTtr                  = " << CvT[0] << " J/kg-K" << std::endl;
+    std::cout << "dET/dTve                  = " << CvT[1] << " J/kg-K" << std::endl;
+    std::cout << "Rotational energy (ER)    = " << ER << " J/kg" << std::endl;
+    std::cout << "dER/dTtr                  = " << CvR[0] << " J/kg-K" << std::endl;
+    std::cout << "dER/dTve                  = " << CvR[1] << " J/kg-K" << std::endl;
+    std::cout << "Vibrational energy (EV)   = " << EV << " J/kg" << std::endl;
+    std::cout << "dEV/dTtr                  = " << CvV[0] << " J/kg-K" << std::endl;
+    std::cout << "dEV/dTve                  = " << CvV[1] << " J/kg-K" << std::endl;
+    std::cout << "Electronic energy (EE)    = " << EE << " J/kg" << std::endl;
+    std::cout << "dEE/dTtr                  = " << CvE[0] << " J/kg-K" << std::endl;
+    std::cout << "dEE/dTve                  = " << CvE[1] << " J/kg-K" << std::endl;
 
-    //std::cout << std::endl << std::endl;
+    std::cout << std::endl << std::endl;
   }
-
-  // input: D, E
-  // output: P, grad, hess
-  //P = ANN_DEP_Hess(&hess[0], &grad[0], D, E);
-  //std::cout << std::endl << "Example 3, ANN_DEP_Hess" << std::endl;
-  //std::cout << "Pressure (P) = " << P << " Pa" << std::endl;
-  //std::cout << "dP/dD = " << grad[0] << std::endl;
-  //std::cout << "dP/dE = " << grad[1] << std::endl;
-  //std::cout << "d**2P/dD**2 = " << hess[0] << std::endl;
-  //std::cout << "d**2P/dDdE = " << hess[1] << std::endl;
-  //std::cout << "d**2P/dE**2 = " << hess[2] << std::endl;
 
   // Finalize ANN
   const char* finlog = ANN_Finalize();
