@@ -91,7 +91,7 @@ namespace ANN {
     }
   }
   inline double Model::Transfer(const double input) const {
-    return 2.0 / (1.0 + std::exp(-2.0 * input)) - 1.0;
+    return 2.0 / (1.0 + exp(-2.0 * input)) - 1.0;
   }
   inline double Model::DiffTransfer(const double input) const {
     const double s = Transfer(input);

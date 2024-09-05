@@ -13,9 +13,9 @@ int main(void) {
 
   // Initialize ANN
   const std::string dir = "model/";
-  const int nspecies = 1;
-  //const char* species_pack[] = {"N2", "O2", "NO", "N", "O", "NOp", "N2p", "O2p", "Np", "Op", "e"};
-  const char* species_pack[] = {"N2"};
+  const int nspecies = 11;
+  const char* species_pack[] = {"N2", "O2", "NO", "N", "O", "NOp", "N2p", "O2p", "Np", "Op", "e"};
+  //const char* species_pack[] = {"C3"};
   const char* mode_pack[4] = {"T", "R", "V", "E"};
   std::vector<ANN_DEF> fptrs;
   std::vector<ANN_GRAD_DEF> gptrs;
@@ -95,6 +95,7 @@ int main(void) {
     //rot_file.close();
     //vib_file.close();
     //ele_file.close();
+    std::cout << "Species " << species_pack[ispecies] << std::endl;
     std::cout << "Translational-rotational temperature (Ttr) = " << Ttr << " K" << std::endl;
     std::cout << "Vibrational-electronic temperature (Tve)   = " << Tve << " K" << std::endl;
 

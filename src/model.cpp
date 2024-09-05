@@ -1,10 +1,3 @@
-#include <algorithm>
-#include <cmath>
-#include <memory>
-#include <sstream>
-#include <string>
-#include <vector>
-
 #include "ann.h"
 #include "model.h"
 
@@ -38,14 +31,14 @@
     const double x[2] = {x1, x2}; \
     double lnE; \
     models[ispecies*3 + 2]->Pred(x, &lnE); \
-    return erg2J*std::exp(lnE); \
+    return erg2J*exp(lnE); \
   } \
   double ANN_##model##E_Grad(double* grad, const double x1, const double x2) { \
     using namespace ANN; \
     const double x[2] = {x1, x2}; \
     double lnE; \
     models[ispecies*3 + 2]->Derivative(x, &lnE, grad); \
-    const double y = erg2J*std::exp(lnE); \
+    const double y = erg2J*exp(lnE); \
     grad[0] *= y; \
     grad[1] *= y; \
     return y; \    
@@ -67,14 +60,14 @@
     const double x[2] = {x1, x2}; \
     double lnE; \
     models[ispecies*3 + 0]->Pred(x, &lnE); \
-    return erg2J*std::exp(lnE); \
+    return erg2J*exp(lnE); \
   } \
   double ANN_##model##R_Grad(double* grad, const double x1, const double x2) { \
     using namespace ANN; \
     const double x[2] = {x1, x2}; \
     double lnE; \
     models[ispecies*3 + 0]->Derivative(x, &lnE, grad); \
-    const double y = erg2J*std::exp(lnE); \
+    const double y = erg2J*exp(lnE); \
     grad[0] *= y; \
     grad[1] *= y; \
     return y; \
@@ -84,14 +77,14 @@
     const double x[2] = {x1, x2}; \
     double lnE; \
     models[ispecies*3 + 1]->Pred(x, &lnE); \
-    return erg2J*(std::exp(lnE) - ev0[ispecies]); \
+    return erg2J*(exp(lnE) - ev0[ispecies]); \
   } \
   double ANN_##model##V_Grad(double* grad, const double x1, const double x2) { \
     using namespace ANN; \
     const double x[2] = {x1, x2}; \
     double lnE; \
     models[ispecies*3 + 1]->Derivative(x, &lnE, grad); \
-    const double y = erg2J*(std::exp(lnE) - ev0[ispecies]); \
+    const double y = erg2J*(exp(lnE) - ev0[ispecies]); \
     grad[0] *= y; \
     grad[1] *= y; \
     return y; \
@@ -101,14 +94,14 @@
     const double x[2] = {x1, x2}; \
     double lnE; \
     models[ispecies*3 + 2]->Pred(x, &lnE); \
-    return erg2J*std::exp(lnE); \
+    return erg2J*exp(lnE); \
   } \
   double ANN_##model##E_Grad(double* grad, const double x1, const double x2) { \
     using namespace ANN; \
     const double x[2] = {x1, x2}; \
     double lnE; \
     models[ispecies*3 + 2]->Derivative(x, &lnE, grad); \
-    const double y = erg2J*std::exp(lnE); \
+    const double y = erg2J*exp(lnE); \
     grad[0] *= y; \
     grad[1] *= y; \
     return y; \
@@ -138,29 +131,63 @@
   double ANN_##model##V(const double x1, const double x2) { \
     using namespace ANN; \
     double E = 0.0; \
+    const double Rs = R/weight_pack[ispecies]; \
+    const double x2_inv = 1.0/x2; \
     for (int ivib = 0; ivib < thetv[ispecies].size(); ivib++) { \
-      E += R/weight_pack[ispecies]*thetv[ispecies][ivib]/(std::exp(thetv[ispecies][ivib]/x2) - 1.0); \
+      E += Rs*thetv[ispecies][ivib]/(exp(thetv[ispecies][ivib]*x2_inv) - 1.0); \
     } \
-    return E - ev0[ispecies]; \
+    return E; \
   } \
   double ANN_##model##V_Grad(double* grad, const double x1, const double x2) { \
     using namespace ANN; \
+    double E = 0.0; \
     double Cv = 0.0; \
+    const double Rs = R/weight_pack[ispecies]; \
     for (int ivib = 0; ivib < thetv[ispecies].size(); ivib++) { \
-      const double arg1 = thetv[ispecies][ivib]/x2; \
-      const double arg2 = arg1*arg1; \
-      Cv += R/weight_pack[ispecies]*arg2*std::exp(arg1)/((std::exp(arg1) - 1.0)*(std::exp(arg1) - 1.0)); \
+      const double Tratio = thetv[ispecies][ivib]/x2; \
+      const double Tratio2 = Tratio*Tratio; \
+      E += Rs*thetv[ispecies][ivib]/(exp(Tratio) - 1.0); \
+      Cv += Rs*Tratio2*exp(Tratio)/((exp(Tratio) - 1.0)*(exp(Tratio) - 1.0)); \
     } \
-    return Cv; \
+    grad[0] = 0.0; \
+    grad[1] = Cv; \
+    return E; \
   } \
   double ANN_##model##E(const double x1, const double x2) { \
     using namespace ANN; \
-    return 0.0; \
+    double qs = 0.0; \
+    double qs1 = 0.0; \
+    double qs2 = 0.0; \
+    const double x2_inv = 1.0/x2; \
+    for (int iele = 0; iele < thetel[ispecies].size(); iele++) { \
+      qs = ge[ispecies][iele]*exp(-thetel[ispecies][iele]*x2_inv); \
+      qs1 += qs*thetel[ispecies][iele]; \
+      qs2 += qs; \
+    } \
+    const double E = qs1/qs2*R/weight_pack[ispecies]; \
+    return E; \
   } \
   double ANN_##model##E_Grad(double* grad, const double x1, const double x2) { \
     using namespace ANN; \
-    grad[0] = grad[1] = 0.0; \
-    return 0.0; \
+    const double Rs = R/weight_pack[ispecies]; \
+    const double x2_inv = 1.0/x2; \
+    double qs = 0.0; \
+    double qs1 = 0.0; \
+    double qs2 = 0.0; \
+    double qs3 = 0.0; \
+    double qs4 = 0.0; \
+    for (int iele = 0; iele < thetel[ispecies].size(); iele++) { \
+      qs = ge[ispecies][iele]*exp(-thetel[ispecies][iele]*x2_inv); \
+      qs1 += qs*thetel[ispecies][iele]; \
+      qs2 += qs; \
+      qs3 += qs*thetel[ispecies][iele]*thetel[ispecies][iele]*x2_inv*x2_inv; \
+      qs4 += qs*thetel[ispecies][iele]*x2_inv*x2_inv; \
+    } \
+    const double cv = (qs3*qs2 - qs1*qs4)/qs2/qs2*Rs; \
+    const double E = qs1/qs2*Rs; \
+    grad[0] = 0.0; \
+    grad[1] = cv; \
+    return E; \
   }
 
 #define ANN_MODEL_ELECTRON(model, ispecies) \
@@ -365,7 +392,7 @@ const char* ANN_Init(const char* modeldir) {
                              + std::to_string(VER_SUBMINOR) + "\n";
 
   models.resize(3*36);
-  for (int ispecies = 0; ispecies < 36; ispecies++) {
+  for (int ispecies = 0; ispecies < 26; ispecies++) {
     string_buffer += species_pack[ispecies] + "T";
     string_buffer += " (INIT SUCCESS)\n";
     for (int imode = 0; imode < 3; imode++) {
@@ -378,6 +405,16 @@ const char* ANN_Init(const char* modeldir) {
         string_buffer += " (INIT FAILURE)\n";
     }
   }
+
+  for (int ispecies = 26; ispecies < 36; ispecies++) {
+    string_buffer += species_pack[ispecies] + "T";
+    string_buffer += " (INIT SUCCESS)\n";
+    for (int imode = 0; imode < 3; imode++) {
+      string_buffer += species_pack[ispecies] + mode_pack[imode];
+      string_buffer += " (INIT_SUCCESS)\n";
+    }
+  }
+
   string_buffer += species_pack.back() + "T";
   string_buffer += " (INIT SUCCESS)\n";
   for (int imode = 0; imode < 3; imode++) {
@@ -423,57 +460,203 @@ namespace ANN {
                                            "N2" , "O2" , "C2" , "H2" , "NO"  , "NH"  , "OH", "CN" , "CO" , "CH",
                                            "SiO", "N2p", "O2p", "NOp", "CNp" , "COp" , "C3", "CO2", "C2H", "CH2",
                                            "H2O", "HCN", "CH3", "CH4", "C2H2", "H2O2", "e"};
-  std::vector<double> weight_pack = {1.400670E-02, 1.599900E-02, 1.201100E-02, 1.008000E-03, 3.994800E-02, 1.400670E-02, 1.599940E-02, 1.201100E-02, 1.008000E-03, 3.994800E-02,
-                                     2.801340E-02, 3.199800E-02, 2.402200E-02, 2.015880E-03, 3.000610E-02, 1.501468E-02, 1.700740E-02, 2.601744E-02, 2.801010E-02, 1.302000E-02,
-                                     4.408400E-02, 2.801000E-02, 3.199880E-02, 3.000610E-02, 2.616890E-02, 2.800960E-02, 3.603300E-02, 4.400900E-02, 2.502930E-02, 1.402658E-02,
-                                     1.801528E-02, 2.702538E-02, 1.503452E-02, 1.604246E-02, 2.604000E-02, 3.401400E-02, 5.485790E-07};
+  std::vector<double> weight_pack = {
+    1.400670E-02, // N
+    1.599900E-02, // O
+    1.201100E-02, // C
+    1.008000E-03, // H
+    3.994800E-02, // Ar
+    1.400670E-02, // Np
+    1.599940E-02, // Op
+    1.201100E-02, // Cp
+    1.008000E-03, // Hp
+    3.994800E-02, // Arp
+    2.801340E-02, // N2
+    3.199800E-02, // O2
+    2.402200E-02, // C2
+    2.015880E-03, // H2
+    3.000610E-02, // NO
+    1.501468E-02, // NH
+    1.700740E-02, // OH
+    2.601744E-02, // CN
+    2.801010E-02, // CO
+    1.302000E-02, // CH
+    4.408400E-02, // SiO
+    2.801000E-02, // N2p
+    3.199880E-02, // O2p
+    3.000610E-02, // NOp
+    2.616890E-02, // CNp
+    2.800960E-02, // COp
+    3.603300E-02, // C3
+    4.400900E-02, // CO2
+    2.502930E-02, // C2H
+    1.402658E-02, // CH2
+    1.801528E-02, // H2O
+    2.702538E-02, // HCN
+    1.503452E-02, // CH3
+    1.604246E-02, // CH4
+    2.604000E-02, // C2H2
+    3.401400E-02, // H2O2
+    5.485790E-07  // e 
+  };
 
-  std::vector<std::vector<double>> thetv = {{0.000000E+00}, {0.000000E+00}, {0.000000E+00}, {0.000000E+00}, {0.000000E+00}, {0.000000E+00}, {0.000000E+00}, {0.000000E+00}, {0.000000E+00}, {0.000000E+00},
-                                            {3.393500E+03}, {2.273576E+03}, {2.668550E+03}, {6.332449E+03}, {2.739662E+03}, {4.722518E+03}, {5.377918E+03}, {2.976280E+03}, {3.121919E+03}, {4.116036E+03},
-                                            {1.786348E+03}, {3.175740E+03}, {2.740576E+03}, {3.419184E+03}, {2.925145E+03}, {3.185783E+03},
-                                            {3.058622E+02, 3.058622E+02, 2.479591E+03, 4.302663E+03}, {1.341115E+03, 1.341115E+03, 2.753973E+03, 4.854217E+03},
-                                            {5.838549E+02, 5.944933E+02, 4.178792E+03, 6.938147E+03}, {2.089006E+03, 6.250888E+03, 6.740219E+03},
-                                            {3.213415E+03, 7.657207E+03, 7.868867E+03}, {1.537370E+03, 1.537370E+03, 4.404282E+03, 6.925168E+03},
-                                            {1.078861E+03, 2.813475E+03, 2.813475E+03, 6.221624E+03, 6.582388E+03, 6.582388E+03},
-                                            {2.688448E+03, 2.688448E+03, 2.688448E+03, 3.126155E+03, 3.126155E+03, 6.065759E+03, 6.277572E+03, 6.277572E+03, 6.277572E+03},
-                                            {1.298803E+03, 1.298803E+03, 1.550028E+03, 1.550028E+03, 4.136480E+03, 6.859573E+03, 7.065823E+03},
-                                            {4.050701E+02, 6.583442E+02, 9.295760E+02, 1.580336E+03, 1.945645E+03, 2.467823E+03, 3.641613E+03, 6.467357E+03, 6.478553E+03}};
+  std::vector<std::vector<double>> thetv = {
+    {0.000000E+00},                                                                                                                 // N
+    {0.000000E+00},                                                                                                                 // O
+    {0.000000E+00},                                                                                                                 // C
+    {0.000000E+00},                                                                                                                 // H
+    {0.000000E+00},                                                                                                                 // Ar
+    {0.000000E+00},                                                                                                                 // Np
+    {0.000000E+00},                                                                                                                 // Op
+    {0.000000E+00},                                                                                                                 // Cp
+    {0.000000E+00},                                                                                                                 // Hp
+    {0.000000E+00},                                                                                                                 // Arp
+    {3.393500E+03},                                                                                                                 // N2
+    {2.273576E+03},                                                                                                                 // O2
+    {2.668550E+03},                                                                                                                 // C2
+    {6.332449E+03},                                                                                                                 // H2
+    {2.739662E+03},                                                                                                                 // NO
+    {4.722518E+03},                                                                                                                 // NH
+    {5.377918E+03},                                                                                                                 // OH
+    {2.976280E+03},                                                                                                                 // CN
+    {3.121919E+03},                                                                                                                 // CO
+    {4.116036E+03},                                                                                                                 // CH
+    {1.786348E+03},                                                                                                                 // SiO
+    {3.175740E+03},                                                                                                                 // N2p
+    {2.740576E+03},                                                                                                                 // O2p
+    {3.419184E+03},                                                                                                                 // NOp
+    {2.925145E+03},                                                                                                                 // CNp
+    {3.185783E+03},                                                                                                                 // COp
+    {3.058622E+02, 3.058622E+02, 2.479591E+03, 4.302663E+03},                                                                       // C3
+    {1.341115E+03, 1.341115E+03, 2.753973E+03, 4.854217E+03},                                                                       // CO2
+    {5.838549E+02, 5.944933E+02, 4.178792E+03, 6.938147E+03},                                                                       // C2H
+    {2.089006E+03, 6.250888E+03, 6.740219E+03},                                                                                     // CH2
+    {3.213415E+03, 7.657207E+03, 7.868867E+03},                                                                                     // H2O
+    {1.537370E+03, 1.537370E+03, 4.404282E+03, 6.925168E+03},                                                                       // HCN
+    {1.078861E+03, 2.813475E+03, 2.813475E+03, 6.221624E+03, 6.582388E+03, 6.582388E+03},                                           // CH3
+    {2.688448E+03, 2.688448E+03, 2.688448E+03, 3.126155E+03, 3.126155E+03, 6.065759E+03, 6.277572E+03, 6.277572E+03, 6.277572E+03}, // CH4
+    {1.298803E+03, 1.298803E+03, 1.550028E+03, 1.550028E+03, 4.136480E+03, 6.859573E+03, 7.065823E+03},                             // C2H2
+    {4.050701E+02, 6.583442E+02, 9.295760E+02, 1.580336E+03, 1.945645E+03, 2.467823E+03, 3.641613E+03, 6.467357E+03, 6.478553E+03}, // H2O2
+    {0.000000E+00}                                                                                                                  // e
+  };
 
-  std::vector<double> ev0 = {0.00000000000000E+00, // N
-                             0.00000000000000E+00, // O
-                             0.00000000000000E+00, // C
-                             0.00000000000000E+00, // H
-                             0.00000000000000E+00, // Ar
-                             0.00000000000000E+00, // Np
-                             0.00000000000000E+00, // Op
-                             0.00000000000000E+00, // Cp
-                             0.00000000000000E+00, // Hp
-                             0.00000000000000E+00, // Arp
-                             5.02096554915455E+09, // N2
-                             2.94367586338399E+09, // O2
-                             4.60067167985591E+09, // C2
-                             1.29318612390291E+11, // H2
-                             3.78201033842404E+09, // NO
-                             1.29351873878448E+10, // NH
-                             1.29961141601302E+10, // OH
-                             4.74097831326855E+09, // CN
-                             4.62008788402121E+09, // CO
-                             1.30119190346340E+10, // CH
-                             1.68050134336794E+09, // SiO
-                             4.69552483397290E+09, // N2p
-                             3.54618906087543E+09, // O2p
-                             4.72113314831563E+09, // NOp
-                             4.65367328681488E+09, // CNp
-                             4.71214387206191E+09, // COp
-                             5.92902349970130E+09, // C3
-                             6.75611420186915E+09, // CO2
-                             1.41936936735291E+10, // C2H
-                             3.10640601979744E+10, // CH2
-                             3.00553759596447E+10, // H2O
-                             1.54000607577410E+10, // HCN
-                             5.01448979558475E+10, // CH3
-                             7.06316214008811E+10, // CH4
-                             2.63634627191810E+10, // C2H2
-                             2.08751310632062E+10, // H2O2
-                             0.00000000000000E+00}; // e
+  std::vector<double> ev0 = { 
+    0.00000000000000E+00, // N
+    0.00000000000000E+00, // O
+    0.00000000000000E+00, // C
+    0.00000000000000E+00, // H
+    0.00000000000000E+00, // Ar
+    0.00000000000000E+00, // Np
+    0.00000000000000E+00, // Op
+    0.00000000000000E+00, // Cp
+    0.00000000000000E+00, // Hp
+    0.00000000000000E+00, // Arp
+    5.02096554915455E+09, // N2
+    2.94367586338399E+09, // O2
+    4.60067167985591E+09, // C2
+    1.29318612390291E+11, // H2
+    3.78201033842404E+09, // NO
+    1.29351873878448E+10, // NH
+    1.29961141601302E+10, // OH
+    4.74097831326855E+09, // CN
+    4.62008788402121E+09, // CO
+    1.30119190346340E+10, // CH
+    1.68050134336794E+09, // SiO
+    4.69552483397290E+09, // N2p
+    3.54618906087543E+09, // O2p
+    4.72113314831563E+09, // NOp
+    4.65367328681488E+09, // CNp
+    4.71214387206191E+09, // COp
+    5.92902349970130E+09, // C3
+    6.75611420186915E+09, // CO2
+    1.41936936735291E+10, // C2H
+    3.10640601979744E+10, // CH2
+    3.00553759596447E+10, // H2O
+    1.54000607577410E+10, // HCN
+    5.01448979558475E+10, // CH3
+    7.06316214008811E+10, // CH4
+    2.63634627191810E+10, // C2H2
+    2.08751310632062E+10, // H2O2
+    0.00000000000000E+00  // e
+  };
+
+  std::vector<std::vector<double>> ge = {
+    {1.0}, // N
+    {1.0}, // O
+    {1.0}, // C
+    {1.0}, // H
+    {1.0}, // Ar
+    {1.0}, // Np
+    {1.0}, // Op
+    {1.0}, // Cp
+    {1.0}, // Hp
+    {1.0}, // Arp
+    {1.0}, // N2
+    {1.0}, // O2
+    {1.0}, // C2
+    {1.0}, // H2
+    {1.0}, // NO
+    {1.0}, // NH
+    {1.0}, // OH
+    {1.0}, // CN
+    {1.0}, // CO
+    {1.0}, // CH
+    {1.0}, // SiO
+    {1.0}, // N2p
+    {1.0}, // O2p
+    {1.0}, // NOp
+    {1.0}, // CNp
+    {1.0}, // COp
+    {1.0, 6.0, 6.0, 3.0, 2.0, 6.0, 3.0, 1.0, 2.0, 2.0}, // C3
+    {1.0, 3.0, 6.0, 3.0, 2.0}, // CO2
+    {2.0, 4.0}, // C2H
+    {3.0, 1.0}, // CH2
+    {1.0}, // H2O
+    {1.0, 1.0}, // HCN
+    {2.0, 2.0}, // CH3
+    {1.0, 1.0}, // CH4
+    {2.0, 3.0, 6.0, 1.0, 3.0, 1.0}, // C2H2
+    {1.0}, // H2O2
+    {1.0}  // e
+  };
+
+  std::vector<std::vector<double>> thetel = {
+    {0.0000000000000E+00}, // N
+    {0.0000000000000E+00}, // O
+    {0.0000000000000E+00}, // C
+    {0.0000000000000E+00}, // H
+    {0.0000000000000E+00}, // Ar
+    {0.0000000000000E+00}, // Np
+    {0.0000000000000E+00}, // Op
+    {0.0000000000000E+00}, // Cp
+    {0.0000000000000E+00}, // Hp
+    {0.0000000000000E+00}, // Arp
+    {0.0000000000000E+00}, // N2
+    {0.0000000000000E+00}, // O2
+    {0.0000000000000E+00}, // C2
+    {0.0000000000000E+00}, // H2
+    {0.0000000000000E+00}, // NO
+    {0.0000000000000E+00}, // NH
+    {0.0000000000000E+00}, // OH
+    {0.0000000000000E+00}, // CN
+    {0.0000000000000E+00}, // CO
+    {0.0000000000000E+00}, // CH
+    {0.0000000000000E+00}, // SiO
+    {0.0000000000000E+00}, // N2p
+    {0.0000000000000E+00}, // O2p
+    {0.0000000000000E+00}, // NOp
+    {0.0000000000000E+00}, // CNp
+    {0.0000000000000E+00}, // COp
+    {0.0000000000000E+00, 2.0142863611443E+04, 3.0933683403288E+04, 3.4242868139454E+04, 3.5502516503155E+04, 4.1868380792357E+04, 4.7191851889667E+04, 4.7335729486892E+04, 4.8486750264689E+04, 5.8270426875961E+04}, // C3
+    {0.0000000000000E+00, 4.3163279167378E+04, 4.7479607084116E+04, 5.1795935000854E+04, 6.4744918751068E+04}, // CO2
+    {0.0000000000000E+00, 5.7551038889838E+03}, // C2H
+    {0.0000000000000E+00, 4.5278279846580E+03}, // CH2
+    {0.0000000000000E+00}, // H2O
+    {0.0000000000000E+00, 7.5185252716074E+04}, // HCN
+    {0.0000000000000E+00, 6.6478643797624E+04}, // CH3
+    {0.0000000000000E+00, 9.8887072572465E+04}, // CH4
+    {0.0000000000000E+00, 3.5969399306149E+04, 5.0357159028608E+04, 6.0713468476835E+04, 7.1938798612298E+04, 7.7860800514062E+04}, // C2H2
+    {0.0000000000000E+00}, // H2O2
+    {0.0000000000000E+00}  // e
+  };
 }

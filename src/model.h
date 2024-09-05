@@ -1,10 +1,12 @@
 #pragma once
 
+#include <cmath>
 #include <memory>
 #include <string>
 #include <vector>
 #include <cstring>
-#include <iostream>
+#include <sstream>
+#include <algorithm>
 
 namespace ANN {
   class Model {
@@ -47,9 +49,13 @@ namespace ANN {
       inline double Diff2Transfer(const double input) const;
   };
 
-  const double R = 8.31446261815324; // Universal gas constant J/K-mol
+  const double R = 8.31446261815324; // Universal gas constant (J/K-mol)
 
   const double erg2J = 1.0E-04; // Convert erg/g to J/kg
+
+  const double cm2erg = 1.9864468E-16; // Convert cm-1 to erg
+
+  const double boltz = 1.380649E-23; // Boltzmann constant (J/K)
 
   extern std::string string_buffer;
 
@@ -59,9 +65,13 @@ namespace ANN {
 
   extern std::vector<std::string> species_pack; // Species names (37 species)
 
-  extern std::vector<double> weight_pack; // Molecular weights of 37 species in kg/mol
+  extern std::vector<double> weight_pack; // Molecular weights of 37 species in (kg/mol)
 
-  extern std::vector<std::vector<double>> thetv; // Characteristic vibrational temperature
+  extern std::vector<std::vector<double>> thetv; // Vibrational characteristic temperature (K)
 
-  extern std::vector<double> ev0; // Ground vibrational energy
+  extern std::vector<double> ev0; // Zero-vibrational energy (erg)
+
+  extern std::vector<std::vector<double>> ge; // Electronic multiplicity of ground state
+
+  extern std::vector<std::vector<double>> thetel; // Electronic characteristic temperature (K)
 }
