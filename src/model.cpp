@@ -30,14 +30,14 @@
     using namespace ANN; \
     const double x[2] = {x1, x2}; \
     double lnE; \
-    models[ispecies*3 + 2]->Pred(x, &lnE); \
+    models[ispecies]->Pred(x, &lnE); \
     return erg2J*exp(lnE); \
   } \
   double ANN_##model##E_Grad(double* grad, const double x1, const double x2) { \
     using namespace ANN; \
     const double x[2] = {x1, x2}; \
     double lnE; \
-    models[ispecies*3 + 2]->Derivative(x, &lnE, grad); \
+    models[ispecies]->Derivative(x, &lnE, grad); \
     const double y = erg2J*exp(lnE); \
     grad[0] *= y; \
     grad[1] *= y; \
@@ -59,14 +59,14 @@
     using namespace ANN; \
     const double x[2] = {x1, x2}; \
     double lnE; \
-    models[ispecies*3 + 0]->Pred(x, &lnE); \
+    models[3*ispecies + 0 - 20]->Pred(x, &lnE); \
     return erg2J*exp(lnE); \
   } \
   double ANN_##model##R_Grad(double* grad, const double x1, const double x2) { \
     using namespace ANN; \
     const double x[2] = {x1, x2}; \
     double lnE; \
-    models[ispecies*3 + 0]->Derivative(x, &lnE, grad); \
+    models[3*ispecies + 0 - 20]->Derivative(x, &lnE, grad); \
     const double y = erg2J*exp(lnE); \
     grad[0] *= y; \
     grad[1] *= y; \
@@ -76,15 +76,15 @@
     using namespace ANN; \
     const double x[2] = {x1, x2}; \
     double lnE; \
-    models[ispecies*3 + 1]->Pred(x, &lnE); \
-    return erg2J*(exp(lnE) - ev0[ispecies]); \
+    models[3*ispecies + 1 - 20]->Pred(x, &lnE); \
+    return erg2J*exp(lnE); \
   } \
   double ANN_##model##V_Grad(double* grad, const double x1, const double x2) { \
     using namespace ANN; \
     const double x[2] = {x1, x2}; \
     double lnE; \
-    models[ispecies*3 + 1]->Derivative(x, &lnE, grad); \
-    const double y = erg2J*(exp(lnE) - ev0[ispecies]); \
+    models[3*ispecies + 1 - 20]->Derivative(x, &lnE, grad); \
+    const double y = erg2J*exp(lnE); \
     grad[0] *= y; \
     grad[1] *= y; \
     return y; \
@@ -93,14 +93,14 @@
     using namespace ANN; \
     const double x[2] = {x1, x2}; \
     double lnE; \
-    models[ispecies*3 + 2]->Pred(x, &lnE); \
+    models[3*ispecies + 2 - 20]->Pred(x, &lnE); \
     return erg2J*exp(lnE); \
   } \
   double ANN_##model##E_Grad(double* grad, const double x1, const double x2) { \
     using namespace ANN; \
     const double x[2] = {x1, x2}; \
     double lnE; \
-    models[ispecies*3 + 2]->Derivative(x, &lnE, grad); \
+    models[3*ispecies + 2 - 20]->Derivative(x, &lnE, grad); \
     const double y = erg2J*exp(lnE); \
     grad[0] *= y; \
     grad[1] *= y; \
@@ -391,13 +391,29 @@ const char* ANN_Init(const char* modeldir) {
                              + std::to_string(VER_MINOR) + "." 
                              + std::to_string(VER_SUBMINOR) + "\n";
 
-  models.resize(3*36);
-  for (int ispecies = 0; ispecies < 26; ispecies++) {
+  models.resize(58);
+
+  // Initialize models for atoms.
+  int flag_cnt = 0;
+  for (int ispecies = 0; ispecies < 10; ispecies++) {
+    string_buffer += species_pack[ispecies] + "T";
+    string_buffer += " (INIT SUCCESS)\n";
+    models[ispecies] = std::make_shared<Model>();
+    const bool init_flag = models[ispecies]->Init(header + "/" + species_pack[ispecies] + "/" + species_pack[ispecies] + mode_pack[2] + ".dat");
+    string_buffer += species_pack[ispecies] + mode_pack[2];
+    if (init_flag)
+      string_buffer += " (INIT SUCCESS)\n";
+    else
+      string_buffer += " (INIT FAILURE)\n";
+  }
+
+  // Initialize models for diatomic molecules.
+  for (int ispecies = 10; ispecies < 26; ispecies++) {
     string_buffer += species_pack[ispecies] + "T";
     string_buffer += " (INIT SUCCESS)\n";
     for (int imode = 0; imode < 3; imode++) {
-      models[3*ispecies + imode] = std::make_shared<Model>();
-      const bool init_flag = models[3*ispecies + imode]->Init(header + "/" + species_pack[ispecies] + "/" + species_pack[ispecies] + mode_pack[imode] + ".dat");
+      models[3*ispecies + imode - 20] = std::make_shared<Model>();
+      const bool init_flag = models[3*ispecies + imode - 20]->Init(header + "/" + species_pack[ispecies] + "/" + species_pack[ispecies] + mode_pack[imode] + ".dat");
       string_buffer += species_pack[ispecies] + mode_pack[imode];
       if (init_flag)
         string_buffer += " (INIT SUCCESS)\n";
@@ -406,19 +422,20 @@ const char* ANN_Init(const char* modeldir) {
     }
   }
 
+  // Initialize models for polyatomic molecules.
   for (int ispecies = 26; ispecies < 36; ispecies++) {
     string_buffer += species_pack[ispecies] + "T";
     string_buffer += " (INIT SUCCESS)\n";
     for (int imode = 0; imode < 3; imode++) {
       string_buffer += species_pack[ispecies] + mode_pack[imode];
-      string_buffer += " (INIT_SUCCESS)\n";
+      string_buffer += " (INIT SUCCESS)\n";
     }
   }
 
-  string_buffer += species_pack.back() + "T";
-  string_buffer += " (INIT SUCCESS)\n";
+  // Initialize models for electron.
+  string_buffer += species_pack[36] + "T";
   for (int imode = 0; imode < 3; imode++) {
-    string_buffer += species_pack.back() + mode_pack[imode];
+    string_buffer += species_pack[36] + mode_pack[imode];
     string_buffer += " (INIT SUCCESS)\n";
   }
 
@@ -430,10 +447,8 @@ const char* ANN_Finalize(void) {
 
   string_buffer = "ANN model finalize!\n";
 
-  for (int ispecies = 0; ispecies < 36; ispecies++) {
-    for (int imode = 0; imode < 3; imode++) {
-      models[3*ispecies + imode].reset();
-    }
+  for (int imodel = 0; imodel < 58; imodel++) {
+    models[imodel].reset();
   }
 
   return string_buffer.c_str();

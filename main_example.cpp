@@ -13,9 +13,8 @@ int main(void) {
 
   // Initialize ANN
   const std::string dir = "model/";
-  const int nspecies = 11;
-  const char* species_pack[] = {"N2", "O2", "NO", "N", "O", "NOp", "N2p", "O2p", "Np", "Op", "e"};
-  //const char* species_pack[] = {"C3"};
+  const int nspecies = 4;
+  const char* species_pack[] = {"N", "N2", "C3", "e"};
   const char* mode_pack[4] = {"T", "R", "V", "E"};
   std::vector<ANN_DEF> fptrs;
   std::vector<ANN_GRAD_DEF> gptrs;
